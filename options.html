@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<script id="domain-template" type="text/html">
+			<span>{{ domain }}</span> <button class="remove-domain-button" data-unblock-domain="{{ domain }}">Unblock Domain</button>
+		</script>
+	</head>
+	<body>
+		<h1>Options</h1>
+		<h2>Blocked Domains</h2>
+		<ul id="blocked-domains-list"></ul>
+		<form id="block-domain-form">
+			<span>Domain to block:</span> <input name="domain" type="text">
+			<input type="submit" value="Block Domain">
+			<span id="block-domain-form-error"></span>
+		</form>
+		<script src="options.js"></script>
+	</body>
+</html>

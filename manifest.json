@@ -1,0 +1,17 @@
+{
+	"manifest_version": 2,
+
+	"name": "Unnamed Site Blocking Extension",
+	"description": "It block sites.",
+	"version": "0.1",
+
+	"permissions": [
+		"tabs"
+	],
+
+	"background": {
+		"scripts": ["background.js"]
+	},
+
+	"options_page": "options.html"
+}
