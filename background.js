@@ -36,7 +36,7 @@ var blockDomain = function (domain, failure) {
 	domain = cleanDomain(domain);
 
 	if (!domain) {
-		failure && failure(domain, "blank");
+		if (failure) failure(domain, "blank");
 
 		return;
 	}
@@ -53,7 +53,7 @@ var blockDomain = function (domain, failure) {
 			domain: domain
 		});
 	} else {
-		failure && failure(domain, "found");
+		if (failure) failure(domain, "found");
 	}
 };
 
