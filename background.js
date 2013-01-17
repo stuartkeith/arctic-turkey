@@ -14,16 +14,6 @@ var saveBlockedDomains = function () {
 	localStorage.setItem("blockedDomains", JSON.stringify(blockedDomains));
 };
 
-// Utilities:
-
-var sendToAllTabs = function (message) {
-	chrome.tabs.query({}, function(tabs) {
-		tabs.forEach(function (tab) {
-			chrome.tabs.sendMessage(tab.id, message);
-		});
-	});
-};
-
 // Blocking and unblocking domains:
 
 var cleanDomain = function (domain) {
@@ -48,7 +38,7 @@ var blockDomain = function (domain, failure) {
 
 		saveBlockedDomains();
 
-		sendToAllTabs({
+		chrome.extension.sendMessage(null, {
 			message: "domainBlocked",
 			domain: domain
 		});
@@ -66,7 +56,7 @@ var unblockDomain = function (domain) {
 
 	saveBlockedDomains();
 
-	sendToAllTabs({
+	chrome.extension.sendMessage(null, {
 		message: "domainUnblocked",
 		domain: domain
 	});
