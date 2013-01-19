@@ -123,23 +123,23 @@
 
 	// Tabs:
 
-	var tabsUpdatedListener = function (tabId, changeInfo, tab) {
-		if (changeInfo.status !== "loading")
-			return;
-
-		var tabURL = tab.url,
-		    domain = getDomainFromURL(tab.url);
+	var redirectTabIfBlocked = function (tab) {
+		var domain = getDomainFromURL(tab.url);
 
 		ifDomainIsBlocked(domain, function (blockedDomain) {
 			var fieldValuePairs = {
-				url: tabURL,
+				url: tab.url,
 				domain: blockedDomain
 			};
 
-			chrome.tabs.update(tabId, {
+			chrome.tabs.update(tab.id, {
 				url: BLOCKED_URL + objectToQueryString(fieldValuePairs)
 			});
 		});
+	};
+
+	var tabsUpdatedListener = function (tabId, changeInfo, tab) {
+		redirectTabIfBlocked(tab);
 	};
 
 	// Blocking:
