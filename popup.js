@@ -30,8 +30,18 @@
 	});
 
 	optionsButton.addEventListener("click", function () {
-		chrome.tabs.create({
+		chrome.tabs.query({
 			url: OPTIONS_URL
+		}, function (tabs) {
+			if (tabs.length > 0) {
+				chrome.tabs.update(tabs[0].id, {
+					active: true
+				});
+			} else {
+				chrome.tabs.create({
+					url: OPTIONS_URL
+				});
+			}
 		});
 	});
 
