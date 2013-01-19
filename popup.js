@@ -109,6 +109,8 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
 
 // Initialise:
 
+startBlockingForm.hours.value = background.settings.lastHoursValue;
+
 if (background.settings.blockedUntilTime) {
 	blockingStarted();
 } else {

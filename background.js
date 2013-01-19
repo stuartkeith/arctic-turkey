@@ -6,6 +6,11 @@ var DEFAULT_BLOCKED_DOMAINS = [
 	"youtube.com"
 ];
 
+var addDefaultSettings = function (settings) {
+	if (settings.lastHoursValue === undefined)
+		settings.lastHoursValue = 1;
+};
+
 // Loading and saving data:
 
 var blockedDomains = JSON.parse(localStorage.getItem("blockedDomains")) || DEFAULT_BLOCKED_DOMAINS,
@@ -18,6 +23,8 @@ var saveBlockedDomains = function () {
 var saveSettings = function () {
 	localStorage.setItem("settings", JSON.stringify(settings));
 };
+
+addDefaultSettings(settings);
 
 // Blocking and unblocking domains:
 
@@ -106,6 +113,7 @@ var startBlocking = function (hours, failure) {
 		if (failure) failure("invalid");
 	} else {
 		settings.blockedUntilTime = getTime() + hoursToMilliseconds(hours);
+		settings.lastHoursValue = hours;
 
 		saveSettings();
 
