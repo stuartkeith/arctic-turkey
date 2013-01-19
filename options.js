@@ -31,10 +31,21 @@ blockDomainForm.addEventListener("submit", function (event) {
 
 // DOM modifiers:
 
+var setDomainButtonsEnabled = function (element) {
+	var removeDomainButtons = element.getElementsByClassName("remove-domain-button"),
+	    isBlocked = !!background.settings.blockedUntilTime;
+
+	for (var i = 0; i < removeDomainButtons.length; i++) {
+		removeDomainButtons[i].disabled = isBlocked;
+	}
+};
+
 var addBlockedDomainElement = function (domain) {
 	var li = document.createElement("li");
 
 	li.innerHTML = domainTemplate.replace(/\{\{ domain \}\}/g, domain);
+
+	setDomainButtonsEnabled(li);
 
 	blockedDomainsList.appendChild(li);
 
@@ -54,6 +65,10 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
 		addBlockedDomainElement(request.domain);
 	} else if (request.message === "domainUnblocked") {
 		removeBlockedDomainElement(request.domain);
+	} else if (request.message === "blockingStarted") {
+		setDomainButtonsEnabled(blockedDomainsList);
+	} else if (request.message === "blockingFinished") {
+		setDomainButtonsEnabled(blockedDomainsList);
 	}
 });
 
