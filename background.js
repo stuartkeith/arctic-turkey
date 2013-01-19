@@ -162,6 +162,10 @@
 	};
 
 	var startBlocking = function () {
+		chrome.tabs.query({}, function (tabs) {
+			tabs.forEach(redirectTabIfBlocked);
+		});
+
 		chrome.tabs.onUpdated.addListener(tabsUpdatedListener);
 
 		startTimer();
