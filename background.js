@@ -32,6 +32,12 @@
 		localStorage.setItem("settings", JSON.stringify(settings));
 	};
 
+	var set = function (name, value) {
+		settings[name] = value;
+
+		saveSettings();
+	};
+
 	addDefaultSettings(settings);
 
 	// Interacting with the blockedDomains array:
@@ -199,6 +205,7 @@
 
 	window.blockedDomains = blockedDomains;
 	window.settings = settings;
+	window.set = set;
 	window.blockDomain = blockDomain;
 	window.unblockDomain = unblockDomain;
 	window.getRemainingTime = getRemainingTime;

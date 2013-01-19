@@ -1,5 +1,6 @@
 var background = chrome.extension.getBackgroundPage(),
     domainTemplate = document.getElementById("domain-template").innerHTML,
+    settingsForm = document.getElementById("settings-form"),
     blockedDomainsList = document.getElementById("blocked-domains-list"),
     blockDomainForm = document.getElementById("block-domain-form"),
     blockDomainFormError = document.getElementById("block-domain-form-error"),
@@ -27,6 +28,10 @@ blockDomainForm.addEventListener("submit", function (event) {
 	});
 
 	blockDomainForm.domain.value = "";
+});
+
+settingsForm.refreshBlockedTabs.addEventListener("click", function (event) {
+	background.set("refreshBlockedTabs", event.target.checked);
 });
 
 // DOM modifiers:
@@ -75,3 +80,5 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
 // Initialise:
 
 background.blockedDomains.forEach(addBlockedDomainElement);
+
+settingsForm.refreshBlockedTabs.checked = background.settings.refreshBlockedTabs;
