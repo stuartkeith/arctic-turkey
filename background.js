@@ -8,10 +8,15 @@ var DEFAULT_BLOCKED_DOMAINS = [
 
 // Loading and saving data:
 
-var blockedDomains = JSON.parse(localStorage.getItem("blockedDomains")) || DEFAULT_BLOCKED_DOMAINS;
+var blockedDomains = JSON.parse(localStorage.getItem("blockedDomains")) || DEFAULT_BLOCKED_DOMAINS,
+    settings = JSON.parse(localStorage.getItem("settings")) || {};
 
 var saveBlockedDomains = function () {
 	localStorage.setItem("blockedDomains", JSON.stringify(blockedDomains));
+};
+
+var saveSettings = function () {
+	localStorage.setItem("settings", JSON.stringify(settings));
 };
 
 // Blocking and unblocking domains:
@@ -61,3 +66,73 @@ var unblockDomain = function (domain) {
 		domain: domain
 	});
 };
+
+// Time:
+
+var getTime = function () {
+	return new Date().getTime();
+};
+
+var hoursToMilliseconds = function (hours) {
+	return Math.floor(3600000 * hours);
+};
+
+var startTimer = function () {
+	chrome.alarms.create("blockAlarm", {
+		when: settings.blockedUntilTime
+	});
+};
+
+var stopTimer = function () {
+	chrome.alarms.clearAll();
+};
+
+var getRemainingTime = function () {
+	if (settings.blockedUntilTime) {
+		return settings.blockedUntilTime - getTime();
+	} else {
+		return 0;
+	}
+};
+
+// Blocking:
+
+var startBlocking = function (hours, failure) {
+	hours = parseFloat(hours);
+
+	if (isNaN(hours)) {
+		if (failure) failure("nan");
+	} else if (hours <= 0) {
+		if (failure) failure("invalid");
+	} else {
+		settings.blockedUntilTime = getTime() + hoursToMilliseconds(hours);
+
+		saveSettings();
+
+		startTimer();
+
+		chrome.extension.sendMessage(null, {
+			message: "blockingStarted"
+		});
+	}
+};
+
+var stopBlocking = function () {
+	stopTimer();
+
+	settings.blockedUntilTime = undefined;
+
+	saveSettings();
+
+	chrome.extension.sendMessage(null, {
+		message: "blockingFinished"
+	});
+};
+
+chrome.alarms.onAlarm.addListener(stopBlocking);
+
+// Initialise:
+
+if (settings.blockedUntilTime) {
+	startTimer();
+}

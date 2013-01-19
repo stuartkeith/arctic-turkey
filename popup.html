@@ -1,11 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<style type="text/css">
+			.hidden {
+				display: none;
+			}
+
+			#countdown {
+				font-family: monospace;
+			}
+		</style>
+	</head>
 	<body>
-		<form id="start-blocking-form">
-			<span>Hours to block:</span> <input name="hours" type="text">
-			<input type="submit" value="Start Blocking">
-			<span id="start-blocking-form-error"></span>
-		</form>
+		<div id="unblocked" class="hidden">
+			<form id="start-blocking-form">
+				<span>Hours to block:</span> <input name="hours" type="text">
+				<input type="submit" value="Start Blocking">
+				<span id="start-blocking-form-error"></span>
+			</form>
+		</div>
+		<div id="blocked" class="hidden">
+			<p>Blocked.</p>
+			<p id="countdown"></p>
+		</div>
 		<button id="options-button">Options</button>
 		<script src="popup.js"></script>
 	</body>
