@@ -15,7 +15,7 @@ startBlockingForm.addEventListener("submit", function (event) {
 
 	startBlockingFormError.innerHTML = "";
 
-	background.startBlocking(startBlockingForm.hours.value, function (reason) {
+	background.setAndStartBlocking(startBlockingForm.hours.value, function (reason) {
 		if (reason === "nan") {
 			startBlockingFormError.innerHTML = "Not a number.";
 		} else if (reason === "invalid") {

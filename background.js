@@ -1,4 +1,8 @@
 (function () {
+	// Constants:
+
+	var BLOCKED_URL = chrome.extension.getURL("blocked.html");
+
 	// Defaults:
 
 	var DEFAULT_BLOCKED_DOMAINS = [
@@ -105,7 +109,7 @@
 
 	// Blocking:
 
-	var startBlocking = function (hours, failure) {
+	var setAndStartBlocking = function (hours, failure) {
 		hours = parseFloat(hours);
 
 		if (isNaN(hours)) {
@@ -118,15 +122,23 @@
 
 			saveSettings();
 
-			startTimer();
-
-			chrome.extension.sendMessage(null, {
-				message: "blockingStarted"
-			});
+			startBlocking();
 		}
 	};
 
+	var startBlocking = function () {
+		chrome.tabs.onUpdated.addListener(tabsUpdatedListener);
+
+		startTimer();
+
+		chrome.extension.sendMessage(null, {
+			message: "blockingStarted"
+		});
+	};
+
 	var stopBlocking = function () {
+		chrome.tabs.onUpdated.removeListener(tabsUpdatedListener);
+
 		stopTimer();
 
 		settings.blockedUntilTime = undefined;
@@ -140,6 +152,41 @@
 
 	chrome.alarms.onAlarm.addListener(stopBlocking);
 
+	// Tabs:
+
+	var getDomainFromURL = function (url) {
+		return url.split("/")[2];
+	};
+
+	var ifDomainIsBlocked = function (domain, callback) {
+		blockedDomains.forEach(function (blockedDomain) {
+			if (domain.indexOf(blockedDomain) >= 0) {
+				callback(blockedDomain);
+
+				return;
+			}
+		});
+	};
+
+	var tabsUpdatedListener = function (tabId, changeInfo, tab) {
+		if (changeInfo.status !== "loading")
+			return;
+
+		var tabURL = tab.url,
+		    domain = getDomainFromURL(tab.url);
+
+		ifDomainIsBlocked(domain, function (blockedDomain) {
+			var fieldValuePairs = {
+				url: tabURL,
+				domain: blockedDomain
+			};
+
+			chrome.tabs.update(tabId, {
+				url: BLOCKED_URL + objectToQueryString(fieldValuePairs)
+			});
+		});
+	};
+
 	// Externally accessible properties:
 
 	window.blockedDomains = blockedDomains;
@@ -147,12 +194,12 @@
 	window.blockDomain = blockDomain;
 	window.unblockDomain = unblockDomain;
 	window.getRemainingTime = getRemainingTime;
-	window.startBlocking = startBlocking;
+	window.setAndStartBlocking = setAndStartBlocking;
 	window.stopBlocking = stopBlocking;
 
 	// Initialise:
 
 	if (settings.blockedUntilTime) {
-		startTimer();
+		startBlocking();
 	}
 }) ();
