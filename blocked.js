@@ -18,4 +18,4 @@
 	domain.innerHTML = fieldValues.domain;
 
 	blockInformation.classList.remove("hidden");
-) ();
+}) ();
