@@ -16,11 +16,14 @@
 	// DOM event listeners:
 
 	startBlockingForm.addEventListener("submit", function (event) {
+		var time = startBlockingForm.time.value,
+		    unit = startBlockingForm.timeUnit.value;
+
 		event.preventDefault();
 
 		startBlockingFormError.innerHTML = "";
 
-		background.setAndStartBlocking(startBlockingForm.hours.value, function (reason) {
+		background.setAndStartBlocking(time, unit, function (reason) {
 			if (reason === "nan") {
 				startBlockingFormError.innerHTML = "Not a number.";
 			} else if (reason === "invalid") {
@@ -124,7 +127,8 @@
 
 	// Initialise:
 
-	startBlockingForm.hours.value = background.settings.lastHoursValue;
+	startBlockingForm.time.value = background.settings.lastTimeInfo.time;
+	startBlockingForm.timeUnit.value = background.settings.lastTimeInfo.unit;
 
 	if (background.settings.blockedUntilTime) {
 		blockingStarted();

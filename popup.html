@@ -11,7 +11,11 @@
 	<body>
 		<div id="unblocked" class="hidden">
 			<form id="start-blocking-form">
-				<span>Hours to block:</span> <input name="hours" type="text">
+				<span>Time to block:</span> <input name="time" type="text">
+				<select name="timeUnit">
+					<option value="minutes">Minutes</option>
+					<option value="hours">Hours</option>
+				</select>
 				<input type="submit" value="Start Blocking">
 				<span id="start-blocking-form-error"></span>
 			</form>

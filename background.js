@@ -12,8 +12,12 @@
 	];
 
 	var addDefaultSettings = function (settings) {
-		if (settings.lastHoursValue === undefined)
-			settings.lastHoursValue = 1;
+		if (settings.lastTimeInfo === undefined) {
+			settings.lastTimeInfo = {
+				unit: "minutes",
+				time: 30
+			};
+		}
 
 		if (settings.refreshBlockedTabs === undefined)
 			settings.refreshBlockedTabs = true;
@@ -108,8 +112,14 @@
 		return new Date().getTime();
 	};
 
-	var hoursToMilliseconds = function (hours) {
-		return Math.floor(3600000 * hours);
+	var timeToMilliseconds = {
+		hours: function (hours) {
+			return Math.floor(3600000 * hours);
+		},
+
+		minutes: function (minutes) {
+			return Math.floor(60000 * minutes);
+		}
 	};
 
 	var startTimer = function () {
@@ -153,16 +163,20 @@
 
 	// Blocking:
 
-	var setAndStartBlocking = function (hours, failure) {
-		hours = parseFloat(hours);
+	var setAndStartBlocking = function (time, unit, failure) {
+		time = parseFloat(time);
 
-		if (isNaN(hours)) {
+		if (isNaN(time)) {
 			if (failure) failure("nan");
-		} else if (hours <= 0) {
+		} else if (time <= 0) {
 			if (failure) failure("invalid");
 		} else {
-			settings.blockedUntilTime = getTime() + hoursToMilliseconds(hours);
-			settings.lastHoursValue = hours;
+			settings.blockedUntilTime = getTime() + timeToMilliseconds[unit](time);
+
+			settings.lastTimeInfo = {
+				unit: unit,
+				time: time
+			};
 
 			saveSettings();
 
