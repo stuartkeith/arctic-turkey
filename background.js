@@ -199,6 +199,9 @@
 	};
 
 	var stopBlocking = function () {
+		var notification = webkitNotifications.createNotification(null, "No longer blocking!", "Your time is up.");
+		notification.show();
+
 		chrome.tabs.onUpdated.removeListener(tabsUpdatedListener);
 
 		stopTimer();
