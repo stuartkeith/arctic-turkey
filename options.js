@@ -1,84 +1,86 @@
-var background = chrome.extension.getBackgroundPage(),
-    domainTemplate = document.getElementById("domain-template").innerHTML,
-    settingsForm = document.getElementById("settings-form"),
-    blockedDomainsList = document.getElementById("blocked-domains-list"),
-    blockDomainForm = document.getElementById("block-domain-form"),
-    blockDomainFormError = document.getElementById("block-domain-form-error"),
-    domainToElementMap = {};
+(function () {
+	var background = chrome.extension.getBackgroundPage(),
+	    domainTemplate = document.getElementById("domain-template").innerHTML,
+	    settingsForm = document.getElementById("settings-form"),
+	    blockedDomainsList = document.getElementById("blocked-domains-list"),
+	    blockDomainForm = document.getElementById("block-domain-form"),
+	    blockDomainFormError = document.getElementById("block-domain-form-error"),
+	    domainToElementMap = {};
 
-// DOM event listeners:
+	// DOM event listeners:
 
-blockedDomainsList.addEventListener("click", function (event) {
-	if (event.target.dataset.unblockDomain) {
-		background.unblockDomain(event.target.dataset.unblockDomain);
-	}
-});
-
-blockDomainForm.addEventListener("submit", function (event) {
-	event.preventDefault();
-
-	blockDomainFormError.innerHTML = "";
-
-	background.blockDomain(blockDomainForm.domain.value, function (domain, reason) {
-		if (reason === "blank") {
-			blockDomainFormError.innerHTML = "Domain is blank.";
-		} else if (reason === "found") {
-			blockDomainFormError.innerHTML = domain + " is already blocked.";
+	blockedDomainsList.addEventListener("click", function (event) {
+		if (event.target.dataset.unblockDomain) {
+			background.unblockDomain(event.target.dataset.unblockDomain);
 		}
 	});
 
-	blockDomainForm.domain.value = "";
-});
+	blockDomainForm.addEventListener("submit", function (event) {
+		event.preventDefault();
 
-settingsForm.refreshBlockedTabs.addEventListener("click", function (event) {
-	background.set("refreshBlockedTabs", event.target.checked);
-});
+		blockDomainFormError.innerHTML = "";
 
-// DOM modifiers:
+		background.blockDomain(blockDomainForm.domain.value, function (domain, reason) {
+			if (reason === "blank") {
+				blockDomainFormError.innerHTML = "Domain is blank.";
+			} else if (reason === "found") {
+				blockDomainFormError.innerHTML = domain + " is already blocked.";
+			}
+		});
 
-var setDomainButtonsEnabled = function (element) {
-	var removeDomainButtons = element.getElementsByClassName("remove-domain-button"),
-	    isBlocked = !!background.settings.blockedUntilTime;
+		blockDomainForm.domain.value = "";
+	});
 
-	for (var i = 0; i < removeDomainButtons.length; i++) {
-		removeDomainButtons[i].disabled = isBlocked;
-	}
-};
+	settingsForm.refreshBlockedTabs.addEventListener("click", function (event) {
+		background.set("refreshBlockedTabs", event.target.checked);
+	});
 
-var addBlockedDomainElement = function (domain) {
-	var li = document.createElement("li");
+	// DOM modifiers:
 
-	li.innerHTML = domainTemplate.replace(/\{\{ domain \}\}/g, domain);
+	var setDomainButtonsEnabled = function (element) {
+		var removeDomainButtons = element.getElementsByClassName("remove-domain-button"),
+		    isBlocked = !!background.settings.blockedUntilTime;
 
-	setDomainButtonsEnabled(li);
+		for (var i = 0; i < removeDomainButtons.length; i++) {
+			removeDomainButtons[i].disabled = isBlocked;
+		}
+	};
 
-	blockedDomainsList.appendChild(li);
+	var addBlockedDomainElement = function (domain) {
+		var li = document.createElement("li");
 
-	domainToElementMap[domain] = li;
-};
+		li.innerHTML = domainTemplate.replace(/\{\{ domain \}\}/g, domain);
 
-var removeBlockedDomainElement = function (domain) {
-	domainToElementMap[domain].remove();
+		setDomainButtonsEnabled(li);
 
-	delete domainToElementMap[domain];
-};
+		blockedDomainsList.appendChild(li);
 
-// Message listener:
+		domainToElementMap[domain] = li;
+	};
 
-chrome.extension.onMessage.addListener(function (request, sender, sendResponse) {
-	if (request.message === "domainBlocked") {
-		addBlockedDomainElement(request.domain);
-	} else if (request.message === "domainUnblocked") {
-		removeBlockedDomainElement(request.domain);
-	} else if (request.message === "blockingStarted") {
-		setDomainButtonsEnabled(blockedDomainsList);
-	} else if (request.message === "blockingFinished") {
-		setDomainButtonsEnabled(blockedDomainsList);
-	}
-});
+	var removeBlockedDomainElement = function (domain) {
+		domainToElementMap[domain].remove();
 
-// Initialise:
+		delete domainToElementMap[domain];
+	};
 
-background.blockedDomains.forEach(addBlockedDomainElement);
+	// Message listener:
 
-settingsForm.refreshBlockedTabs.checked = background.settings.refreshBlockedTabs;
+	chrome.extension.onMessage.addListener(function (request, sender, sendResponse) {
+		if (request.message === "domainBlocked") {
+			addBlockedDomainElement(request.domain);
+		} else if (request.message === "domainUnblocked") {
+			removeBlockedDomainElement(request.domain);
+		} else if (request.message === "blockingStarted") {
+			setDomainButtonsEnabled(blockedDomainsList);
+		} else if (request.message === "blockingFinished") {
+			setDomainButtonsEnabled(blockedDomainsList);
+		}
+	});
+
+	// Initialise:
+
+	background.blockedDomains.forEach(addBlockedDomainElement);
+
+	settingsForm.refreshBlockedTabs.checked = background.settings.refreshBlockedTabs;
+}) ();
