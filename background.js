@@ -31,7 +31,21 @@
 
 	addDefaultSettings(settings);
 
-	// Blocking and unblocking domains:
+	// Interacting with the blockedDomains array:
+
+	var getDomainFromURL = function (url) {
+		return url.split("/")[2];
+	};
+
+	var ifDomainIsBlocked = function (domain, callback) {
+		blockedDomains.forEach(function (blockedDomain) {
+			if (domain.indexOf(blockedDomain) >= 0) {
+				callback(blockedDomain);
+
+				return;
+			}
+		});
+	};
 
 	var cleanDomain = function (domain) {
 		return domain.trim();
@@ -79,7 +93,7 @@
 		});
 	};
 
-	// Time:
+	// Time and timers:
 
 	var getTime = function () {
 		return new Date().getTime();
@@ -105,6 +119,27 @@
 		} else {
 			return 0;
 		}
+	};
+
+	// Tabs:
+
+	var tabsUpdatedListener = function (tabId, changeInfo, tab) {
+		if (changeInfo.status !== "loading")
+			return;
+
+		var tabURL = tab.url,
+		    domain = getDomainFromURL(tab.url);
+
+		ifDomainIsBlocked(domain, function (blockedDomain) {
+			var fieldValuePairs = {
+				url: tabURL,
+				domain: blockedDomain
+			};
+
+			chrome.tabs.update(tabId, {
+				url: BLOCKED_URL + objectToQueryString(fieldValuePairs)
+			});
+		});
 	};
 
 	// Blocking:
@@ -151,41 +186,6 @@
 	};
 
 	chrome.alarms.onAlarm.addListener(stopBlocking);
-
-	// Tabs:
-
-	var getDomainFromURL = function (url) {
-		return url.split("/")[2];
-	};
-
-	var ifDomainIsBlocked = function (domain, callback) {
-		blockedDomains.forEach(function (blockedDomain) {
-			if (domain.indexOf(blockedDomain) >= 0) {
-				callback(blockedDomain);
-
-				return;
-			}
-		});
-	};
-
-	var tabsUpdatedListener = function (tabId, changeInfo, tab) {
-		if (changeInfo.status !== "loading")
-			return;
-
-		var tabURL = tab.url,
-		    domain = getDomainFromURL(tab.url);
-
-		ifDomainIsBlocked(domain, function (blockedDomain) {
-			var fieldValuePairs = {
-				url: tabURL,
-				domain: blockedDomain
-			};
-
-			chrome.tabs.update(tabId, {
-				url: BLOCKED_URL + objectToQueryString(fieldValuePairs)
-			});
-		});
-	};
 
 	// Externally accessible properties:
 
