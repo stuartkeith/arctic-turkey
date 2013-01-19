@@ -14,6 +14,9 @@
 	var addDefaultSettings = function (settings) {
 		if (settings.lastHoursValue === undefined)
 			settings.lastHoursValue = 1;
+
+		if (settings.refreshBlockedTabs === undefined)
+			settings.refreshBlockedTabs = true;
 	};
 
 	// Loading and saving data:
@@ -185,7 +188,8 @@
 		saveSettings();
 
 		chrome.extension.sendMessage(null, {
-			message: "blockingFinished"
+			message: "blockingFinished",
+			shouldRefresh: settings.refreshBlockedTabs
 		});
 	};
 
