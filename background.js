@@ -231,6 +231,10 @@
 	// Initialise:
 
 	if (settings.blockedUntilTime) {
-		startBlocking();
+		if (getRemainingTime() > 0) {
+			startBlocking();
+		} else {
+			stopBlocking();
+		}
 	}
 }) ();
