@@ -133,11 +133,10 @@
 	};
 
 	var getRemainingTime = function () {
-		if (settings.blockedUntilTime) {
-			return settings.blockedUntilTime - getTime();
-		} else {
-			return 0;
-		}
+		// if null/defined, will be treated as 0
+		var remainingTime = settings.blockedUntilTime - getTime();
+
+		return remainingTime > 0 ? remainingTime : 0;
 	};
 
 	// Tabs:
