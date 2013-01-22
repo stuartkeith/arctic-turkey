@@ -44,6 +44,18 @@
 
 	addDefaultSettings(settings);
 
+	// Badge text:
+
+	var updateBadgeText = function () {
+		var totalBlockedTime = settings.blockedUntilTime - settings.blockedAtTime,
+		    elapsedBlockedTime = getTime() - settings.blockedAtTime,
+		    text = Math.floor((elapsedBlockedTime / totalBlockedTime) * 100) + "%";
+
+		chrome.browserAction.setBadgeText({
+			text: text
+		});
+	};
+
 	// Interacting with the blockedDomains array:
 
 	var getDomainFromURL = function (url) {
@@ -126,6 +138,10 @@
 		chrome.alarms.create("blockAlarm", {
 			when: settings.blockedUntilTime
 		});
+
+		chrome.alarms.create("badgeAlarm", {
+			periodInMinutes: 1
+		});
 	};
 
 	var stopTimer = function () {
@@ -163,6 +179,8 @@
 	// Blocking:
 
 	var setAndStartBlocking = function (time, unit, failure) {
+		var currentTime;
+
 		time = parseFloat(time);
 
 		if (isNaN(time)) {
@@ -170,7 +188,10 @@
 		} else if (time <= 0) {
 			if (failure) failure("invalid");
 		} else {
-			settings.blockedUntilTime = getTime() + timeToMilliseconds[unit](time);
+			currentTime = getTime();
+
+			settings.blockedAtTime = currentTime;
+			settings.blockedUntilTime = currentTime + timeToMilliseconds[unit](time);
 
 			settings.lastTimeInfo = {
 				unit: unit,
@@ -184,6 +205,8 @@
 	};
 
 	var startBlocking = function () {
+		updateBadgeText();
+
 		chrome.tabs.query({}, function (tabs) {
 			tabs.forEach(redirectTabIfBlocked);
 		});
@@ -198,6 +221,10 @@
 	};
 
 	var stopBlocking = function () {
+		chrome.browserAction.setBadgeText({
+			text: ""
+		});
+
 		var notification = webkitNotifications.createNotification(null, "No longer blocking!", "Your time is up.");
 		notification.show();
 
@@ -205,6 +232,7 @@
 
 		stopTimer();
 
+		settings.blockedAtTime = undefined;
 		settings.blockedUntilTime = undefined;
 
 		saveSettings();
@@ -215,7 +243,13 @@
 		});
 	};
 
-	chrome.alarms.onAlarm.addListener(stopBlocking);
+	chrome.alarms.onAlarm.addListener(function (alarm) {
+		if (alarm.name === "blockAlarm") {
+			stopBlocking();
+		} else if (alarm.name === "badgeAlarm") {
+			updateBadgeText();
+		}
+	});
 
 	// Externally accessible properties:
 
