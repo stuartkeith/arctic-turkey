@@ -9,10 +9,6 @@
 	    timer,
 	    countdownValue = 0;
 
-	// Constants:
-
-	var OPTIONS_URL = chrome.extension.getURL("options.html");
-
 	// DOM event listeners:
 
 	startBlockingForm.addEventListener("submit", function (event) {
@@ -33,19 +29,7 @@
 	});
 
 	optionsButton.addEventListener("click", function () {
-		chrome.tabs.query({
-			url: OPTIONS_URL
-		}, function (tabs) {
-			if (tabs.length > 0) {
-				chrome.tabs.update(tabs[0].id, {
-					active: true
-				});
-			} else {
-				chrome.tabs.create({
-					url: OPTIONS_URL
-				});
-			}
-		});
+		background.showOptions();
 	});
 
 	// Timer:

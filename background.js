@@ -1,7 +1,8 @@
 (function () {
 	// Constants:
 
-	var BLOCKED_URL = chrome.extension.getURL("blocked.html");
+	var BLOCKED_URL = chrome.extension.getURL("blocked.html"),
+	    OPTIONS_URL = chrome.extension.getURL("options.html");
 
 	// Defaults:
 
@@ -43,6 +44,24 @@
 	};
 
 	addDefaultSettings(settings);
+
+	// Options:
+
+	var showOptions = function () {
+		chrome.tabs.query({
+			url: OPTIONS_URL
+		}, function (tabs) {
+			if (tabs.length > 0) {
+				chrome.tabs.update(tabs[0].id, {
+					active: true
+				});
+			} else {
+				chrome.tabs.create({
+					url: OPTIONS_URL
+				});
+			}
+		});
+	};
 
 	// Badge text:
 
@@ -271,6 +290,7 @@
 	window.blockedDomains = blockedDomains;
 	window.settings = settings;
 	window.set = set;
+	window.showOptions = showOptions;
 	window.blockDomain = blockDomain;
 	window.unblockDomain = unblockDomain;
 	window.getRemainingTime = getRemainingTime;
