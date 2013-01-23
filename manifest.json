@@ -8,7 +8,10 @@
 	"permissions": [
 		"alarms",
 		"notifications",
-		"tabs"
+		"tabs",
+		"webRequest",
+		"webRequestBlocking",
+		"<all_urls>"
 	],
 
 	"background": {

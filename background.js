@@ -62,10 +62,12 @@
 		return url.split("/")[2];
 	};
 
-	var ifDomainIsBlocked = function (domain, callback) {
+	var ifURLIsBlocked = function (url, callback) {
+		var domain = getDomainFromURL(url);
+
 		blockedDomains.forEach(function (blockedDomain) {
 			if (domain.indexOf(blockedDomain) >= 0) {
-				callback(blockedDomain);
+				callback(domain, blockedDomain);
 
 				return;
 			}
@@ -157,23 +159,27 @@
 
 	// Tabs:
 
-	var redirectTabIfBlocked = function (tab) {
-		var domain = getDomainFromURL(tab.url);
-
-		ifDomainIsBlocked(domain, function (blockedDomain) {
+	var getBlockedURL = function (url, callback) {
+		ifURLIsBlocked(url, function (domain, blockedDomain) {
 			var fieldValuePairs = {
-				url: tab.url,
+				url: url,
 				domain: blockedDomain
 			};
 
-			chrome.tabs.update(tab.id, {
-				url: BLOCKED_URL + objectToQueryString(fieldValuePairs)
-			});
+			callback(BLOCKED_URL + objectToQueryString(fieldValuePairs));
 		});
 	};
 
-	var tabsUpdatedListener = function (tabId, changeInfo, tab) {
-		redirectTabIfBlocked(tab);
+	var onBeforeRequestListener = function (details) {
+		var response;
+
+		getBlockedURL(details.url, function (blockedURL) {
+			response = {
+				redirectUrl: blockedURL
+			};
+		});
+
+		return response;
 	};
 
 	// Blocking:
@@ -208,10 +214,18 @@
 		updateBadgeText();
 
 		chrome.tabs.query({}, function (tabs) {
-			tabs.forEach(redirectTabIfBlocked);
+			tabs.forEach(function (tab) {
+				getBlockedURL(tab.url, function (blockedURL) {
+					chrome.tabs.update(tab.id, {
+						url: blockedURL
+					});
+				});
+			});
 		});
 
-		chrome.tabs.onUpdated.addListener(tabsUpdatedListener);
+		chrome.webRequest.onBeforeRequest.addListener(onBeforeRequestListener, {
+			urls: ["<all_urls>"]
+		}, ["blocking"]);
 
 		startTimer();
 
@@ -228,7 +242,7 @@
 		var notification = webkitNotifications.createNotification(null, "No longer blocking!", "Your time is up.");
 		notification.show();
 
-		chrome.tabs.onUpdated.removeListener(tabsUpdatedListener);
+		chrome.webRequest.onBeforeRequest.removeListener(onBeforeRequestListener);
 
 		stopTimer();
 
