@@ -244,6 +244,7 @@
 		});
 
 		chrome.webRequest.onBeforeRequest.addListener(onBeforeRequestListener, {
+			types: ["main_frame"],
 			urls: ["<all_urls>"]
 		}, ["blocking"]);
 
