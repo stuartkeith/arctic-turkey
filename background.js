@@ -162,8 +162,9 @@
 	var getBlockedURL = function (url, callback) {
 		ifURLIsBlocked(url, function (domain, blockedDomain) {
 			var fieldValuePairs = {
-				url: url,
-				domain: blockedDomain
+				blockedDomain: blockedDomain,
+				domain: blockedDomain,
+				url: url
 			};
 
 			callback(BLOCKED_URL + objectToQueryString(fieldValuePairs));
