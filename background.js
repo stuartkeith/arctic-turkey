@@ -182,7 +182,7 @@
 		ifURLIsBlocked(url, function (domain, blockedDomain) {
 			var fieldValuePairs = {
 				blockedDomain: blockedDomain,
-				domain: blockedDomain,
+				domain: domain,
 				url: url
 			};
 
