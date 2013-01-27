@@ -2,7 +2,13 @@
 	// Constants:
 
 	var BLOCKED_URL = chrome.extension.getURL("blocked.html"),
-	    OPTIONS_URL = chrome.extension.getURL("options.html");
+	    OPTIONS_URL = chrome.extension.getURL("options.html"),
+	    ICON_OFF = {
+	    	path: chrome.extension.getURL("icons/icon19.png")
+	    },
+	    ICON_ON = {
+	    	path: chrome.extension.getURL("icons/icon19-frozen.png")
+	    };
 
 	// Defaults:
 
@@ -233,6 +239,8 @@
 	var startBlocking = function () {
 		updateBadgeText();
 
+		chrome.browserAction.setIcon(ICON_ON);
+
 		chrome.tabs.query({}, function (tabs) {
 			tabs.forEach(function (tab) {
 				getBlockedURL(tab.url, function (blockedURL) {
@@ -259,6 +267,8 @@
 		chrome.browserAction.setBadgeText({
 			text: ""
 		});
+
+		chrome.browserAction.setIcon(ICON_OFF);
 
 		var notification = webkitNotifications.createNotification(null, "No longer blocking!", "Your time is up.");
 		notification.show();
